@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KonterMatt · Position 3 · Entscheidungsbaum v13</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c0f;
+  --bg2: #111418;
+  --bg3: #181d23;
+  --bg4: #1e242c;
+  --border: #252c36;
+  --border2: #2e3844;
+  --text: #d4dbe6;
+  --text2: #7a8899;
+  --text3: #4a5566;
+  --accent: #4a9eff;
+  --green: #3ecf6e;
+  --green-dim: #1a3d2a;
+  --green-border: #2a6645;
+  --orange: #f08c3e;
+  --orange-dim: #3a2010;
+  --orange-border: #7a4520;
+  --purple: #a87fff;
+  --purple-dim: #2a1f45;
+  --purple-border: #5a3d99;
+  --amber: #e8b44a;
+  --amber-dim: #35280a;
+  --red: #ef5350;
+  --red-dim: #3a1010;
+  --blue: #4a9eff;
+  --blue-dim: #0d2040;
+  --gray-dim: #1a1f28;
+  --certain: #3ecf6e;
+  --certain-bg: #0d2a1a;
+  --attempt: #e8b44a;
+  --attempt-bg: #2a2010;
+  --font: 'IBM Plex Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --r: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+body { min-height: 100vh; }
+
+/* ── Layout ── */
+.wrap { max-width: 760px; margin: 0 auto; padding: 32px 16px 80px; }
+
+/* ── Header ── */
+.header { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.header-title { display: flex; align-items: center; gap: 10px; }
+.header-title h1 { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--accent); letter-spacing: -0.3px; }
+.version-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 4px; background: var(--bg4); border: 1px solid var(--border2); color: var(--text2); }
+.header p { font-size: 12px; color: var(--text2); max-width: 580px; line-height: 1.7; }
+
+/* ── Legend ── */
+.legend { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.leg { display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid; }
+.leg-green { background: var(--green-dim); border-color: var(--green-border); color: var(--green); }
+.leg-orange { background: var(--orange-dim); border-color: var(--orange-border); color: var(--orange); }
+.leg-purple { background: var(--purple-dim); border-color: var(--purple-border); color: var(--purple); }
+.leg-certain { background: var(--certain-bg); border-color: #1a5a35; color: var(--certain); }
+.leg-attempt { background: var(--attempt-bg); border-color: #5a4510; color: var(--attempt); }
+.leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.leg-dot-certain { background: var(--certain); }
+.leg-dot-attempt { background: var(--attempt); }
+
+/* ── Info Box ── */
+.infobox { padding: 12px 16px; border-radius: var(--r); background: var(--bg2); border: 1px solid var(--border); font-size: 11px; color: var(--text2); line-height: 1.9; margin-bottom: 16px; }
+.infobox strong { color: var(--text); }
+
+/* ── Nick Bar ── */
+.nick-area { margin-bottom: 14px; }
+.nick-bar { padding: 9px 14px; border-radius: var(--r); background: var(--bg2); border: 1px solid var(--border); font-size: 12px; color: var(--text2); display: flex; justify-content: space-between; align-items: center; }
+.nick-bar strong { color: var(--accent); font-family: var(--mono); }
+.nick-bar a { cursor: pointer; color: var(--text3); text-decoration: underline; font-size: 11px; }
+.nick-prompt { padding: 14px; border-radius: var(--r); background: var(--bg2); border: 1px solid var(--border); }
+.nick-prompt p { font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+.nick-row { display: flex; gap: 8px; }
+.nick-inp { flex: 1; padding: 8px 12px; border-radius: 5px; font-size: 13px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); outline: none; font-family: var(--font); transition: border-color .15s; }
+.nick-inp:focus { border-color: var(--accent); }
+.nick-go { padding: 8px 18px; border-radius: 5px; border: none; cursor: pointer; background: #1a6b3a; color: var(--green); font-size: 13px; font-weight: 600; font-family: var(--font); transition: background .15s; }
+.nick-go:hover { background: #1e7d44; }
+.nick-enter { padding: 10px 16px; border-radius: var(--r); cursor: pointer; background: var(--bg2); border: 1px dashed var(--border2); font-size: 12px; color: var(--text2); text-align: center; transition: border-color .15s; }
+.nick-enter:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Section Divider ── */
+.section-div { display: flex; align-items: center; gap: 12px; margin: 24px 0 12px; font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: 0.5px; text-transform: uppercase; }
+.section-div hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+
+/* ── Node ── */
+.node { margin-bottom: 3px; }
+.node-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 13px 15px; transition: border-color .15s; }
+.node-card.open { border-color: var(--accent); }
+.node-card.clickable { cursor: pointer; }
+.node-card.clickable:hover { border-color: var(--border2); }
+.node-card.clickable.open:hover { border-color: var(--accent); }
+.node-header { display: flex; align-items: flex-start; gap: 10px; }
+.node-icon { font-size: 17px; line-height: 1.2; flex-shrink: 0; margin-top: 1px; }
+.node-body { flex: 1; min-width: 0; }
+.node-ref { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 2px; letter-spacing: 0.3px; }
+.node-title { font-weight: 500; font-size: 13px; line-height: 1.4; color: var(--text); }
+.node-desc { font-size: 11px; color: var(--text2); margin-top: 4px; line-height: 1.6; }
+.node-conds { margin-top: 6px; font-size: 11px; color: var(--text2); line-height: 1.8; }
+.node-conds b { color: var(--amber); }
+.node-meta { display: flex; gap: 5px; align-items: center; flex-shrink: 0; }
+.arrow { color: var(--text3); font-size: 10px; display: inline-block; transition: transform .2s; user-select: none; }
+.arrow.open { transform: rotate(90deg); }
+.children { padding-left: 18px; border-left: 1.5px solid var(--border); margin-left: 22px; margin-top: 3px; }
+
+/* ── Branch Label ── */
+.blabel { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 2px 9px; border-radius: 4px; margin: 7px 0 4px; background: #162030; color: var(--accent); border: 1px solid #1e3050; }
+.blabel.green { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+.blabel.red { background: var(--red-dim); color: var(--red); border-color: #7a2020; }
+.blabel.amber { background: var(--amber-dim); color: var(--amber); border-color: #7a5a10; }
+.blabel.gray { background: var(--gray-dim); color: var(--text2); border-color: var(--border); }
+.blabel.purple { background: var(--purple-dim); color: var(--purple); border-color: var(--purple-border); }
+.blabel.blue { background: var(--blue-dim); color: var(--blue); border-color: #1a3a70; }
+.blabel-ref { opacity: 0.6; font-weight: 400; }
+
+/* ── Action Card ── */
+.action-card { padding: 10px 13px; border-radius: var(--r); margin-top: 4px; border: 1px solid; }
+.action-card.green { background: var(--green-dim); border-color: var(--green-border); }
+.action-card.orange { background: var(--orange-dim); border-color: var(--orange-border); }
+.action-card.purple { background: var(--purple-dim); border-color: var(--purple-border); }
+.action-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.action-body { flex: 1; min-width: 0; }
+.action-ref { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+.action-title { font-weight: 600; font-size: 13px; }
+.action-card.green .action-title { color: var(--green); }
+.action-card.orange .action-title { color: var(--orange); }
+.action-card.purple .action-title { color: var(--purple); }
+.action-desc { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.6; }
+
+/* ── Win Certainty Badge ── */
+.win-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; font-family: var(--mono); padding: 3px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+.win-badge.certain { background: var(--certain-bg); color: var(--certain); border: 1px solid #1d5535; }
+.win-badge.attempt { background: var(--attempt-bg); color: var(--attempt); border: 1px solid #604510; }
+.win-badge.discard { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple-border); }
+.win-badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.win-badge.certain .win-badge-dot { background: var(--certain); }
+.win-badge.attempt .win-badge-dot { background: var(--attempt); }
+.win-badge.discard .win-badge-dot { background: var(--purple); }
+
+/* ── Feedback ── */
+.fb-btn { background: transparent; border: 1px solid var(--border); color: var(--text3); border-radius: 5px; padding: 3px 8px; cursor: pointer; font-size: 10px; font-family: var(--mono); transition: all .15s; }
+.fb-btn:hover { border-color: var(--border2); color: var(--text2); }
+.fb-btn.active { background: rgba(74,158,255,.12); border-color: var(--accent); color: var(--accent); }
+.fb-btn.has { border-color: var(--border2); }
+.fb-panel { margin-top: 10px; padding: 12px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); }
+.fb-badges { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
+.badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; font-family: var(--mono); }
+.badge.gut { background: rgba(62,207,110,.1); color: var(--green); border: 1px solid rgba(62,207,110,.25); }
+.badge.mittel { background: rgba(232,180,74,.1); color: var(--amber); border: 1px solid rgba(232,180,74,.25); }
+.badge.schlecht { background: rgba(239,83,80,.1); color: var(--red); border: 1px solid rgba(239,83,80,.25); }
+.fb-entries { max-height: 200px; overflow-y: auto; margin-bottom: 10px; }
+.fb-entry { padding: 8px 10px; margin-bottom: 4px; border-radius: 5px; background: var(--bg2); border: 1px solid var(--border); }
+.fb-entry-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; gap: 6px; }
+.fb-entry-meta { display: flex; align-items: center; gap: 6px; }
+.fb-entry-nick { font-family: var(--mono); font-size: 10px; color: var(--accent); }
+.fb-entry-date { font-size: 9px; color: var(--text3); }
+.fb-entry-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 10px; padding: 1px 4px; }
+.fb-entry-del:hover { color: var(--red); }
+.fb-entry-text { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.fb-rate-row { display: flex; gap: 4px; margin-bottom: 8px; }
+.fb-rate-btn { flex: 1; padding: 5px 0; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: 500; border: 1px solid var(--border); background: var(--bg2); color: var(--text2); font-family: var(--font); transition: all .15s; }
+.fb-rate-btn:hover { border-color: var(--border2); }
+.fb-rate-btn.gut.sel { background: rgba(62,207,110,.12); border-color: rgba(62,207,110,.5); color: var(--green); }
+.fb-rate-btn.mittel.sel { background: rgba(232,180,74,.12); border-color: rgba(232,180,74,.5); color: var(--amber); }
+.fb-rate-btn.schlecht.sel { background: rgba(239,83,80,.12); border-color: rgba(239,83,80,.5); color: var(--red); }
+.fb-input-row { display: flex; gap: 6px; }
+.fb-ta { flex: 1; padding: 6px 10px; border-radius: 5px; font-size: 11px; background: var(--bg2); border: 1px solid var(--border); color: var(--text); resize: vertical; font-family: var(--font); line-height: 1.5; outline: none; transition: border-color .15s; }
+.fb-ta:focus { border-color: var(--accent); }
+.fb-submit { padding: 6px 12px; border-radius: 5px; cursor: pointer; background: #1a6b3a; color: var(--green); border: none; font-size: 11px; font-weight: 600; font-family: var(--font); align-self: flex-end; transition: background .15s; }
+.fb-submit:hover { background: #1e7d44; }
+.fb-submit:disabled { background: var(--bg3); color: var(--text3); cursor: default; }
+.fb-hint { font-size: 9px; color: var(--text3); margin-top: 5px; text-align: right; }
+.fb-hint a { cursor: pointer; text-decoration: underline; color: var(--text3); }
+.fb-hint a:hover { color: var(--accent); }
+.fb-nick-cta { font-size: 11px; color: var(--text2); text-align: center; padding: 8px; cursor: pointer; background: var(--bg2); border-radius: 5px; border: 1px dashed var(--border2); transition: border-color .15s; }
+.fb-nick-cta:hover { border-color: var(--accent); color: var(--accent); }
+.refnote { font-size: 12px; color: var(--accent); font-weight: 500; margin: 4px 0 2px 1px; font-family: var(--mono); }
+.b-desc { font-size: 11px; color: var(--text2); margin: 3px 0 4px 1px; line-height: 1.6; }
+.b-cond { font-size: 11px; color: var(--amber); margin: 2px 0 3px 1px; font-family: var(--mono); }
+
+/* ── Footer ── */
+.footer { text-align: center; margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border); color: var(--text3); font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px; }
+
+.branch-label-row { display: flex; align-items: center; gap: 6px; }
+.branch-label-row .blabel { margin: 7px 0 4px; }
+.branch-arrow { color: var(--text3); font-size: 10px; display: inline-block; transition: transform .2s; user-select: none; cursor: pointer; padding: 2px 4px; flex-shrink: 0; }
+.branch-arrow.open { transform: rotate(90deg); }
+.branch-body { padding-left: 4px; }
+
+.io-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.io-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; border: 1px solid; font-size: 12px; font-weight: 500; font-family: var(--font); cursor: pointer; transition: all .15s; }
+.io-btn-export { background: var(--bg2); border-color: var(--border2); color: var(--text2); }
+.io-btn-export:hover { border-color: var(--accent); color: var(--accent); background: var(--blue-dim); }
+.io-btn-import { background: var(--bg2); border-color: var(--border2); color: var(--text2); }
+.io-btn-import:hover { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+.io-msg { font-size: 11px; font-family: var(--mono); padding: 4px 10px; border-radius: 5px; }
+.io-msg.ok { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+.io-msg.err { background: var(--red-dim); color: var(--red); border: 1px solid #7a2020; }
+#import-file-input { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="header-top">
+      <div class="header-title">
+        <span style="font-size:22px">🃏</span>
+        <h1>KonterMatt · Position 3 · Entscheidungsbaum</h1>
+        <span class="version-badge">v13</span>
+      </div>
+    </div>
+    <p>Vollständiger Entscheidungsbaum für den Hard-Bot als dritter Spieler. Jeder Schritt trägt eine eindeutige Referenznummer <code style="font-family:var(--mono);font-size:10px;background:var(--bg3);padding:1px 5px;border-radius:3px">[P3-…]</code> für präzise Kommunikation. Klicke 💬 um Notizen zu hinterlassen.</p>
+    <div class="legend">
+      <span class="leg leg-green">Karte spielen</span>
+      <span class="leg leg-orange">Trumpf spielen</span>
+      <span class="leg leg-purple">Abwerfen</span>
+      <span class="leg leg-certain"><span class="leg-dot leg-dot-certain"></span>Stich sicher gewonnen</span>
+      <span class="leg leg-attempt"><span class="leg-dot leg-dot-attempt"></span>Versuch, Stich zu gewinnen</span>
+    </div>
+  </div>
+
+  <div id="nick-area"></div>
+  <div class="io-bar" id="io-bar"></div>
+  <input type="file" id="import-file-input" accept=".json">
+
+  <div class="infobox">
+    <strong>Punktwerte:</strong> Ass = 4 · König = 3 · Dame = 2 · Bube = 1 · Zehn/Neun = 0 &nbsp;·&nbsp;
+    <strong>Permanent Trumpf:</strong> ♠D, ♥D, ♦D sind <em>immer</em> Trumpf &nbsp;·&nbsp;
+    <strong>Rundensieg:</strong> 21+ von 40 Punkten · 6 Stiche pro Runde
+  </div>
+
+  <div id="tree"></div>
+
+  <div class="footer">KONTERMATT BOT AI · HARD-MODUS · POSITION 3 · v13 · <span id="share-hint"></span></div>
+</div>
+
+<script>
+// ─── Storage ───────────────────────────────────────────────
+const SK = "km-pos3-v14-num";
+const NK = "km-pos3-nick-v3";
+let fb = {}, nick = "", showNP = false;
+
+const useStorage = typeof window.storage !== "undefined";
+
+async function loadFB() {
+  if (useStorage) { try { const r = await window.storage.get(SK, true); return r ? JSON.parse(r.value) : {}; } catch { return {}; } }
+  try { const v = localStorage.getItem(SK); return v ? JSON.parse(v) : {}; } catch { return {}; }
+}
+async function saveFB(d) {
+  if (useStorage) { try { await window.storage.set(SK, JSON.stringify(d), true); } catch {} return; }
+  try { localStorage.setItem(SK, JSON.stringify(d)); } catch {}
+}
+async function loadNick() {
+  if (useStorage) { try { const r = await window.storage.get(NK, false); return r ? r.value : ""; } catch { return ""; } }
+  try { return localStorage.getItem(NK) || ""; } catch { return ""; }
+}
+async function saveNick(n) {
+  if (useStorage) { try { await window.storage.set(NK, n, false); } catch {} return; }
+  try { localStorage.setItem(NK, n); } catch {}
+}
+
+// ─── Tree Data ─────────────────────────────────────────────
+// certainty: "certain" = Stich wird garantiert gewonnen
+//            "attempt" = Versuch, Stich zu gewinnen (Gegner könnte noch übertrumpfen)
+//            "discard" = Karte abwerfen (kein Stichgewinn)
+//            null = gemischte/neutrale Aktion
+
+const TREE = {
+  id:"root", icon:"🏆", ref:"P3",
+  title:"Ist die Runde bereits gewonnen (vor diesem Stich)?",
+  desc:"BEVOR irgendeine andere Entscheidung getroffen wird: Hat das Team bereits VOR dem aktuellen Stich >= 21 Punkte? Wenn ja, ist der Rundensieg bereits gesichert — die Kartenwahl spielt keine Rolle mehr.",
+  branches:[
+    { id:"pre1", ref:"P3-1", label:"Ja — Runde bereits gewonnen (vor diesem Stich)", lc:"green",
+      desc:"Team hat bereits VOR diesem Stich >= 21 Punkte. Der Sieg ist gesichert — unabhängig vom aktuellen Stich.",
+      branches:[
+        { id:"pre1a", ref:"P3-1a", label:"Unser Team hat bisher ALLE Stiche gewonnen", lc:"green",
+          desc:"Chance auf alle 6 Stiche (Sweep) = Zusatzpunkte. Sweep-Priorität: Stich gewinnen, aber wirtschaftlich — schwächste Karte die noch gewinnt.",
+          yes:{ id:"a_pre1a", ref:"P3-1a.A", action:true, type:"green", certainty:"attempt",
+                title:"→ Schwächste Karte spielen die den Stich noch gewinnt",
+                desc:"Sweep-Modus: Stich muss gewonnen werden (sonst kein Sweep-Bonus), aber so günstig wie möglich. Spieler 4 könnte noch überbieten." }},
+        { id:"pre1b", ref:"P3-1b", label:"Kein Sweep möglich (Gegner hat mind. 1 Stich)", lc:"gray",
+          desc:"Runde ist bereits gewonnen. Kein Sweep mehr möglich.",
+          yes:{ id:"a_pre1b", ref:"P3-1b.A", action:true, type:"green", certainty:null,
+                title:"→ Beliebige Karte spielen",
+                desc:"Runde bereits gewonnen — keine strategische Präferenz." }},
+      ]},
+    { id:"pre2", ref:"P3-2", label:"Runde noch nicht gewonnen, aber aktueller Stich reicht zum Sieg", lc:"amber",
+      desc:"Prüfung VOR dem aktuellen Stich: Team-Punkte (bisher) < 21, ABER Team-Punkte + Punkte im aktuellen Stich >= 21? Dynamischer Schwellenwert — z.B. bei 10 Punkten und einem Stich mit 11+ Punkten greift diese Regel bereits.",
+      branches:[
+        { id:"pre2a", ref:"P3-2a", label:"Ich habe eine Karte die den Stich garantiert gewinnt", lc:"green",
+          desc:"Es gibt mindestens eine Karte in meiner Hand die den aktuellen Stich sicher gewinnt (Bot nutzt BotRoundWinCheck / findGuaranteedWinners).",
+          yes:{ id:"a_pre2a", ref:"P3-2a.A", action:true, type:"orange", certainty:"certain",
+                title:"→ Stärkste Karte die den Stich garantiert gewinnt",
+                desc:"Dieser Stich = Rundengewinn. Kein Risiko — stärkste garantierte Gewinnerkarte einsetzen." }},
+        { id:"pre2b", ref:"P3-2b", label:"Keine garantierte Gewinnerkarte in meiner Hand", lc:"red",
+          desc:"Der Stich würde zum Sieg reichen, aber ich kann ihn nicht garantiert gewinnen. Trotzdem versuchen.",
+          children:[
+            { id:"pre2b1", ref:"P3-2b.1", icon:"🎯",
+              title:"Versuch: Beste verfügbare Karte spielen",
+              desc:"Keine garantierte Gewinnerkarte — aber der Versuch lohnt sich, da dieser Stich die Runde entscheiden würde. Weiter mit normalem Entscheidungsbaum falls kein sinnvoller Versuch möglich.",
+              branches:[
+                { id:"pre2b1a", ref:"P3-2b.1a", label:"Es gibt eine Karte die aktuell führt (nicht garantiert)",
+                  yes:{ id:"a_pre2b1a", ref:"P3-2b.1a.A", action:true, type:"green", certainty:"attempt",
+                        title:"→ Stärkste Karte die aktuell den Stich gewinnen würde",
+                        desc:"Versuch den entscheidenden Stich zu holen. Spieler 4 könnte noch überbieten." }},
+                { id:"pre2b1b", ref:"P3-2b.1b", label:"Ich kann den Stich nicht gewinnen",
+                  refTo:"pre3", refLabel:"→ Weiter zu P3-3 (normales Spiel)" },
+              ]},
+          ]},
+      ]},
+    { id:"pre_enemy", ref:"P3-E", label:"Gegnerteam gewinnt mit diesem Stich die Runde", lc:"red",
+      desc:"Prüfung: Gegner-Punkte (bisher) + Punkte im aktuellen Stich >= 21? Wenn ja ist das Spiel verloren — ausser wir gewinnen diesen Stich noch. Alles einsetzen um den Stich zu holen.",
+      branches:[
+        { id:"pre_ea", ref:"P3-E.a", label:"Ich kann den Stich noch gewinnen", lc:"green",
+          desc:"Es gibt eine Karte in meiner Hand die den aktuellen Stich gewinnen kann (auch auf Versuch).",
+          yes:{ id:"a_pre_ea", ref:"P3-E.a.A", action:true, type:"orange", certainty:"attempt",
+                title:"→ Stärkste Karte die den Stich gewinnen kann",
+                desc:"Spiel steht auf dem Spiel — stärkste verfügbare Gewinnerkarte einsetzen, auch wenn nicht garantiert. Besser versuchen als sicher verlieren." }},
+        { id:"pre_eb", ref:"P3-E.b", label:"Ich kann den Stich nicht gewinnen", lc:"gray",
+          desc:"Keine Karte in meiner Hand kann den aktuellen Stich mehr gewinnen. Spiel ist verloren.",
+          yes:{ id:"a_pre_eb", ref:"P3-E.b.A", action:true, type:"purple", certainty:"discard",
+                title:"→ Niedrigste Karte spielen (Schadensbegrenzung)",
+                desc:"Stich kann nicht mehr gewonnen werden, Runde ist verloren. Niedrigste Karte abwerfen." }},
+      ]},
+    { id:"pre3", ref:"P3-3", label:"Normales Spiel", lc:"gray", children:[
+      { id:"s0", ref:"P3-3.1", icon:"🂠",
+        title:"Nur eine spielbare Karte? (inkl. Stich 6)",
+        desc:"Wenn nur eine Karte regelkonform gespielt werden kann (oder es Stich 6 ist und nur eine Karte übrig), gibt es keine Entscheidung.",
+        branches:[
+          { id:"s0y", ref:"P3-3.1a", label:"Ja, nur eine Karte",
+            yes:{ id:"a0", ref:"P3-3.1a.A", action:true, type:"green", certainty:null,
+                  title:"→ Einzige Karte spielen",
+                  desc:"Kein Spielraum — keine Entscheidung möglich. Stich 6 ist immer trivial." }},
+          { id:"s0n", ref:"P3-3.1b", label:"Nein, mehrere Karten", children:[
+            { id:"s1", ref:"P3-3.2", icon:"⚔️",
+              title:"Over-Trumpf-Regel: Hat Spieler 2 getrumpft?",
+              desc:"Wenn Spieler 1 KEINE Trumpfkarte ausgespielt hat, aber Spieler 2 eine Trumpfkarte gelegt hat — muss ich mit einer höheren Trumpfkarte übertrumpfen, sofern ich eine habe.",
+              branches:[
+                { id:"s1y", ref:"P3-3.2a", label:"Ja, Spieler 2 hat getrumpft", lc:"blue", children:[
+                  { id:"s1a", ref:"P3-3.2a.1", icon:"❓",
+                    title:"Habe ich eine höhere Trumpfkarte?",
+                    branches:[
+                      { id:"s1ay", ref:"P3-3.2a.1a", label:"Ja",
+                        yes:{ id:"a1", ref:"P3-3.2a.1a.A", action:true, type:"orange", certainty:"attempt",
+                              title:"→ Schwächste höhere Trumpfkarte spielen",
+                              desc:"Immer übertrumpfen. Sparsam: schwächste die noch gewinnt. Aber: Spieler 4 spielt nach uns und kann noch mit einer höheren Trumpfkarte übertrumpfen." }},
+                      { id:"s1an", ref:"P3-3.2a.1b", label:"Nein", refTo:"s2", refLabel:"→ Weiter zu P3-3.3" },
+                    ]}
+                ]},
+                { id:"s1n", ref:"P3-3.2b", label:"Nein / Lead war Trumpf", refTo:"s2", refLabel:"→ Weiter zu P3-3.3" },
+              ]},
+            { id:"s2", ref:"P3-3.3", icon:"🤝",
+              title:"Gewinnt mein Partner (Spieler 1) den Stich gerade?",
+              desc:"Prüfen ob die Karte des Partners die höchste im Stich ist. Trumpf schlägt Farbe, innerhalb derselben Kategorie gewinnt die höchste Karte.",
+              branches:[
+                // ═══ PARTNER GEWINNT ═══
+                { id:"s2y", ref:"P3-3.3a", label:"Ja — Partner gewinnt", lc:"green", children:[
+                  { id:"s3_secure", ref:"P3-3.3a.0", icon:"🔒",
+                    section:"Partner liegt vorne im Stich",
+                    title:"Gewinnt Partner den Stich GARANTIERT? (BotWinSecurity = secure)",
+                    desc:"BotWinSecurity prüft: Gibt es noch Karten die Partners Karte schlagen können? 'secure' = keine höhere Karte mehr im Spiel (alle gezählt). Wenn secure: sofort maximale Punkte abgeben, kein Trumpf verschwenden.",
+                    branches:[
+                      { id:"s3_secure_yes", ref:"P3-3.3a.0a", label:"Ja — Partner gewinnt garantiert (secure)", lc:"green",
+                        desc:"BotWinSecurity.level == .secure: Keine höhere Karte mehr im Spiel. Spieler 4 kann den Stich nicht mehr nehmen.",
+                        children:[
+                          { id:"s4_dump_certain", ref:"P3-3.3a.0a.1", icon:"💰",
+                            title:"Maximale Punkte abgeben — Stich ist SICHER beim Partner",
+                            desc:"Stich ist garantiert beim Partner. Keine Trumpf verschwenden. Höchstmögliche Punktkarte abgeben.",
+                            branches:[
+                              { id:"s4dc_a", ref:"P3-3.3a.0a.1a", label:"Ausgespieltes ist Trumpf",
+                                branches:[
+                                  { id:"s4dc_a1", ref:"P3-3.3a.0a.1a.1", label:"Habe Trumpf",
+                                    yes:{ id:"a_s4dc_a1", ref:"P3-3.3a.0a.1a.1.A", action:true, type:"green", certainty:"certain",
+                                          title:"→ Schwächste Trumpfkarte mitgeben",
+                                          desc:"Trumpf bedienen mit niedrigstem Rang. Stich ist garantiert beim Partner." }},
+                                  { id:"s4dc_a2", ref:"P3-3.3a.0a.1a.2", label:"Kein Trumpf",
+                                    yes:{ id:"a_s4dc_a2", ref:"P3-3.3a.0a.1a.2.A", action:true, type:"green", certainty:"certain",
+                                          title:"→ Höchste Punktkarte abwerfen",
+                                          desc:"Ass (4) > König (3) > Dame (2) > Bube (1). Stich garantiert beim Partner." }},
+                                ]},
+                              { id:"s4dc_b", ref:"P3-3.3a.0a.1b", label:"Ausgespieltes ist Farbe",
+                                branches:[
+                                  { id:"s4dc_b1", ref:"P3-3.3a.0a.1b.1", label:"Kann Farbe bedienen",
+                                    yes:{ id:"a_s4dc_b1", ref:"P3-3.3a.0a.1b.1.A", action:true, type:"green", certainty:"certain",
+                                          title:"→ Höchste Punktkarte in der Farbe mitgeben",
+                                          desc:"Ass der Farbe (4pt) ideal. Stich garantiert beim Partner." }},
+                                  { id:"s4dc_b2", ref:"P3-3.3a.0a.1b.2", label:"Kann Farbe nicht bedienen",
+                                    yes:{ id:"a_s4dc_b2", ref:"P3-3.3a.0a.1b.2.A", action:true, type:"green", certainty:"certain",
+                                          title:"→ Höchste Nicht-Trumpf-Punktkarte abwerfen (KEIN Trumpf!)",
+                                          desc:"Ass > König > Dame > Bube aus anderer Farbe. Keinen Trumpf verschwenden — Stich ist bereits sicher." }},
+                                ]},
+                            ]},
+                        ]},
+                      { id:"s3_secure_no", ref:"P3-3.3a.0b", label:"Nein — Partner könnte noch überboten werden (likely/atRisk/unsafe)", lc:"amber",
+                        desc:"Spieler 4 hat noch nicht gespielt und könnte Partner's Karte schlagen. BotWinSecurity berücksichtigt alle noch möglichen Karten.",
+                        children:[
+                { id:"s3_partner", ref:"P3-3.3a.1", icon:"🛡️",
+                    title:"Feature K — Sicherungs-Trumpf: Soll ich absichern?",
+                    desc:"Wenn ich die Farbe nicht bedienen kann UND mein Partner eine hochwertige Karte gespielt hat — soll ich trumpfen um zu verhindern dass Spieler 4 den Stich stiehlt?",
+                    conditions:["Ausgespieltes ist KEINE Trumpfkarte","Spieler 2 hat NICHT getrumpft","Ich kann Farbe NICHT bedienen (blank)","Ich habe Trumpfkarten","Gegner haben noch Trümpfe"],
+                    branches:[
+                      { id:"s3ky", ref:"P3-3.3a.1a", label:"Alle Bedingungen erfüllt", lc:"amber", children:[
+                        { id:"s3k_check", ref:"P3-3.3a.1a.1", icon:"🔍",
+                          title:"Drei Evidenz-Stufen: Wird Spieler 4 trumpfen?",
+                          branches:[
+                            { id:"s3k1", ref:"P3-3.3a.1a.1-I", label:"① SICHER", lc:"red",
+                              title:"Gegner ist nachweislich blank in der Farbe",
+                              desc:"Aus der Stich-Historie: Spieler 4 hat diese Farbe nicht bedient → garantiert blank.",
+                              condition:"Stich ≥ 3 Punkte ODER Ausgespieltes war Ass/König",
+                              yes:{ id:"a3k1", ref:"P3-3.3a.1a.1-I.A", action:true, type:"orange", certainty:"certain",
+                                    title:"→ Schwächste Trumpfkarte (unter König) spielen",
+                                    desc:"Stich absichern — Gegner WIRD trumpfen. Da wir den Trumpf des Gegners überbieten, ist der Stich sicher." }},
+                            { id:"s3k2", ref:"P3-3.3a.1a.1-II", label:"② WAHRSCHEINLICH", lc:"amber",
+                              title:"Stich 3+ und ≤ 2 Farbkarten übrig im Spiel",
+                              desc:"Ich selbst bin blank. Wenn von 5 Karten dieser Farbe bereits 3+ gespielt, ist der Gegner statistisch wahrscheinlich auch blank.",
+                              condition:"Stich ≥ 3 Punkte ODER Ausgespieltes war Ass/König",
+                              yes:{ id:"a3k2", ref:"P3-3.3a.1a.1-II.A", action:true, type:"orange", certainty:"attempt",
+                                    title:"→ Schwächste Trumpfkarte spielen",
+                                    desc:"Statistische Absicherung — Gegner wahrscheinlich blank. Nicht garantiert: Spieler 4 könnte noch eine Farbkarte haben." }},
+                            { id:"s3k3", ref:"P3-3.3a.1a.1-III", label:"③ SCHÜTZEND", lc:"blue",
+                              title:"Partner hat Ass gespielt, Stich ≥ 4 Punkte",
+                              desc:"Das Ass ist 4 Punkte wert. Mit schwacher Trumpfkarte absichern, starke Trümpfe aufheben.",
+                              yes:{ id:"a3k3", ref:"P3-3.3a.1a.1-III.A", action:true, type:"orange", certainty:"attempt",
+                                    title:"→ Nur schwache Trumpfkarte (unter König) spielen",
+                                    desc:"Ass schützen. Keine starken Trümpfe verschwenden. Versuch: Spieler 4 könnte noch höher trumpfen." }},
+                            { id:"s3k_none", ref:"P3-3.3a.1a.1-0", label:"Keine Evidenz", lc:"gray",
+                              refTo:"s4_dump", refLabel:"→ Weiter zu P3-3.3a.2" },
+                          ]}
+                      ]},
+                      { id:"s3kn", ref:"P3-3.3a.1b", label:"Bedingung nicht erfüllt", refTo:"s4_dump", refLabel:"→ Weiter zu P3-3.3a.2" },
+                    ]},
+                  { id:"s4_dump", ref:"P3-3.3a.2", icon:"💰",
+                    title:"Partner unterstützen: Maximal Punkte abgeben!",
+                    desc:"Partner liegt aktuell vorne — aber Spieler 4 hat noch nicht gespielt und könnte noch übertrumpfen oder höher bedienen. Trotzdem: so viele Punkte wie möglich mitgeben.",
+                    branches:[
+                      { id:"s4a", ref:"P3-3.3a.2a", label:"Ausgespieltes ist Trumpf",
+                        branches:[
+                          { id:"s4a1", ref:"P3-3.3a.2a.1", label:"Habe Trumpf",
+                            yes:{ id:"a4a1", ref:"P3-3.3a.2a.1.A", action:true, type:"green", certainty:"attempt",
+                                  title:"→ Schwächste Trumpfkarte mitgeben",
+                                  desc:"Trumpf bedienen mit niedrigstem Rang. Achtung: Spieler 4 spielt noch — Partner führt aktuell, hat den Stich aber noch nicht sicher." }},
+                          { id:"s4a2", ref:"P3-3.3a.2a.2", label:"Kein Trumpf",
+                            yes:{ id:"a4a2", ref:"P3-3.3a.2a.2.A", action:true, type:"green", certainty:"attempt",
+                                  title:"→ Höchste Punktkarte abwerfen",
+                                  desc:"Ass (4) > König (3) > Dame (2) > Bube (1) > Zehn/Neun (0). Partner führt, aber Spieler 4 spielt noch." }},
+                        ]},
+                      { id:"s4b", ref:"P3-3.3a.2b", label:"Ausgespieltes ist Farbe",
+                        branches:[
+                          { id:"s4b1", ref:"P3-3.3a.2b.1", label:"Kann Farbe bedienen",
+                            yes:{ id:"a4b1", ref:"P3-3.3a.2b.1.A", action:true, type:"green", certainty:"attempt",
+                                  title:"→ Höchste Punktkarte in der Farbe mitgeben",
+                                  desc:"Z.B. Ass der Farbe (4 Punkte) ist ideal. Partner führt, aber Spieler 4 spielt noch." }},
+                          { id:"s4b2", ref:"P3-3.3a.2b.2", label:"Bin blank",
+                            yes:{ id:"a4b2", ref:"P3-3.3a.2b.2.A", action:true, type:"green", certainty:"attempt",
+                                  title:"→ Höchste Nicht-Trumpf-Punktkarte abwerfen",
+                                  desc:"Ass > König > Dame > Bube aus anderer Farbe. Partner führt, aber Spieler 4 könnte noch übertrumpfen." }},
+                        ]},
+                    ]},
+                ]},
+              ]},
+            ]},
+
+                // ═══ GEGNER GEWINNT ═══
+                { id:"s2n", ref:"P3-3.3b", label:"Nein — Partner verliert gerade den Stich", lc:"green", children:[
+                  { id:"s5_pts", ref:"P3-3.3b.1", icon:"📊",
+                    section:"Gegner gewinnt den Stich",
+                    title:"v13: Punkt-basierte Stich-Bewertung",
+                    desc:"Der Punktwert des Stichs bestimmt WIE aggressiv der Bot spielt. Drei Stufen statt einem einfachen Ja/Nein.",
+                    branches:[
+                      { id:"s5low", ref:"P3-3.3b.1a", label:"0–2 Punkte (niedrig)", lc:"gray",
+                        title:"Stich hat wenig Wert — Ressourcen schonen",
+                        desc:"Gilt nur wenn kein Trumpf-Lead: wenn Trumpf ausgespielt wurde, ist die Over-Trumpf-Regel (P3-3.2) bereits vorgelagert.",
+                        branches:[
+                          { id:"s5low_t1", ref:"P3-3.3b.1a-T1", label:"Stich 1 (erster Stich)", lc:"blue",
+                            desc:"Noch keine Information über Gegner-Blanks. Konservativ spielen.",
+                            yes:{ id:"a5low_t1", ref:"P3-3.3b.1a-T1.A", action:true, type:"green", certainty:"attempt",
+                                  title:"→ Nur mit Ass gewinnen, sonst schwächste Karte",
+                                  desc:"Stich 1 ist zum Informationen sammeln. Versuch nur mit Ass (sichere Dominanz), sonst Verlust minimieren." }},
+                          { id:"s5low_t25", ref:"P3-3.3b.1a-T2", label:"Stich 2–5",
+                            desc:"Mehr Info verfügbar, aber Stich trotzdem wenig wert.",
+                            yes:{ id:"a5low_t25", ref:"P3-3.3b.1a-T2.A", action:true, type:"green", certainty:"attempt",
+                                  title:"→ Ass spielen wenn verfügbar, sonst schwächste Karte",
+                                  desc:"Versuch mit Ass (baut Dominanz auf). Kein Trumpf für 0-2pt Stiche einsetzen." }},
+                        ]},
+                      { id:"s5mid", ref:"P3-3.3b.1b", label:"3–5 Punkte (mittel)", lc:"amber",
+                        title:"Stich lohnt sich — immer nehmen wenn möglich",
+                        refTo:"s6_how", refLabel:"→ Weiter zu P3-3.3b.2 — Schwächste Gewinnerkarte (wirtschaftlich)" },
+                      { id:"s5high", ref:"P3-3.3b.1c", label:"6+ Punkte (hoch)", lc:"red",
+                        title:"Hochwertiger Stich — maximale Kontrolle!",
+                        refTo:"s6_how", refLabel:"→ Weiter zu P3-3.3b.2 — STÄRKSTE Gewinnerkarte (Sicherheit vor Sparsamkeit)" },
+                    ]},
+                  { id:"s6_how", ref:"P3-3.3b.2", icon:"❓",
+                    title:"Wie gewinne ich den Stich?",
+                    desc:"Bei 3–5pt: schwächste Karte die gewinnt (wirtschaftlich). Bei 6+pt: STÄRKSTE Karte (Sicherheit). Ob der Stich wirklich sicher ist, hängt von den noch unbekannten Karten von Spieler 4 ab.",
+                    branches:[
+                      { id:"s6a", ref:"P3-3.3b.2a", label:"Trumpf wurde ausgespielt",
+                        title:"Habe ich selbst Trumpfkarten auf der Hand?",
+                        branches:[
+                          { id:"s6a1", ref:"P3-3.3b.2a.1", label:"Ja, ich habe Trumpf",
+                            title:"Kann ich die aktuell führende Trumpfkarte schlagen?",
+                            branches:[
+                              { id:"s6a1y", ref:"P3-3.3b.2a.1a", label:"Ja, ich kann die führende Trumpfkarte schlagen",
+                                yes:{ id:"a6a1y", ref:"P3-3.3b.2a.1a.A", action:true, type:"orange", certainty:"attempt",
+                                      title:"→ Gewinnende Trumpfkarte spielen",
+                                      desc:"3–5pt: schwächste Gewinnerin. 6+pt: STÄRKSTE. 0–2pt: nur Ass. Versuch: Spieler 4 könnte noch höher trumpfen." }},
+                              { id:"s6a1n", ref:"P3-3.3b.2a.1b", label:"Nein, mein Trumpf ist schwächer als der führende",
+                                yes:{ id:"a6a1n", ref:"P3-3.3b.2a.1b.A", action:true, type:"green", certainty:"discard",
+                                      title:"→ Trumpfkarte mit niedrigstem Punktwert",
+                                      desc:"Muss Trumpf bedienen, kann aber nicht gewinnen. Kosten minimieren." }},
+                            ]},
+                          { id:"s6a2", ref:"P3-3.3b.2a.2", label:"Nein, ich habe keinen Trumpf",
+                            yes:{ id:"a6a2", ref:"P3-3.3b.2a.2.A", action:true, type:"purple", certainty:"discard",
+                                  title:"→ Verlustminimierung: niedrigste Nicht-Trumpf-Karte",
+                                  desc:"Kein Trumpf vorhanden, Trumpf-Lead kann nicht bedient werden. Niedrigste Nicht-Trumpf-Karte abwerfen = kleinster Punktverlust." }},
+                        ]},
+                      { id:"s6b", ref:"P3-3.3b.2b", label:"Farbe (kein Trumpf) wurde ausgespielt",
+                        title:"Kann ich die gespielte Farbe bedienen?",
+                        branches:[
+                          { id:"s6b1", ref:"P3-3.3b.2b.1", label:"Ja, ich kann die Farbe bedienen",
+                            title:"Kann ich die aktuell führende Farbkarte schlagen?",
+                            branches:[
+                              { id:"s6b1y", ref:"P3-3.3b.2b.1a", label:"Ja, meine Farbkarte schlägt die führende",
+                                yes:{ id:"a6b1y", ref:"P3-3.3b.2b.1a.A", action:true, type:"green", certainty:"attempt",
+                                      title:"→ Gewinnende Farbkarte spielen",
+                                      desc:"3–5pt: schwächste Gewinnerin. 6+pt: STÄRKSTE. 0–2pt: nur Ass. Versuch: Spieler 4 könnte noch trumpfen oder höher bedienen." }},
+                              { id:"s6b1n", ref:"P3-3.3b.2b.1b", label:"Nein, ich habe keine höhere Farbkarte",
+                                yes:{ id:"a6b1n", ref:"P3-3.3b.2b.1b.A", action:true, type:"green", certainty:"discard",
+                                      title:"→ Schwächste Farbkarte",
+                                      desc:"Kann nicht gewinnen, Verluste minimieren." }},
+                            ]},
+                          { id:"s6b2", ref:"P3-3.3b.2b.2", label:"Nein, ich kann die Farbe nicht bedienen — Trumpfen oder abwerfen?",
+                            title:"Trumpf-Entscheidung: Trumpf darf immer gespielt werden",
+                            branches:[
+                              { id:"s6b2q", ref:"P3-3.3b.2b.2a", label:"v13: Permanent-Damen-Fang", lc:"purple",
+                                title:"Stich ≥ 4 Punkte UND ich habe ♠D, ♥D oder ♦D?",
+                                desc:"Permanent-Damen sind billigste Trümpfe (2 Punkte). Trumpf darf immer gespielt werden — ideal um wertvolle Stiche günstig zu stehlen bevor teurere Trümpfe eingesetzt werden.",
+                                yes:{ id:"a6b2q", ref:"P3-3.3b.2b.2a.A", action:true, type:"orange", certainty:"attempt",
+                                      title:"→ Billigste Permanent-Dame spielen",
+                                      desc:"♦D < ♥D < ♠D (nach Ranking). 2pt-Investition für 4+pt Stich = profitabel. Versuch: Spieler 4 könnte noch höher trumpfen." }},
+                              { id:"s6b2t", ref:"P3-3.3b.2b.2b", label:"Keine Permanent-Dame verfügbar oder Stich < 4 Punkte",
+                                title:"Feature A: Hyper-Trumpfen",
+                                branches:[
+                                  { id:"s6b2y", ref:"P3-3.3b.2b.2b.1", label:"Trumpf spielen (mind. 4 Punkte im Stich)",
+                                    yes:{ id:"a6b2y", ref:"P3-3.3b.2b.2b.1.A", action:true, type:"orange", certainty:"attempt",
+                                          title:"→ Trumpfen — schwächste Trumpfkarte",
+                                          desc:"Bedingung: Stich hat mind. 4 Punkte. Trumpf darf immer gespielt werden — auch ohne blank zu sein. Versuch: Spieler 4 könnte noch höher trumpfen." }},
+                                  { id:"s6b2n", ref:"P3-3.3b.2b.2b.2", label:"Nicht trumpfen (Stich < 4 Punkte oder kein Trumpf)",
+                                    yes:{ id:"a6b2n", ref:"P3-3.3b.2b.2b.2.A", action:true, type:"purple", certainty:"discard",
+                                          title:"→ Niedrigste Nicht-Trumpf-Karte abwerfen",
+                                          desc:"Bewusste Entscheidung nicht zu trumpfen (z.B. Trumpf sparen). Niedrigste Nicht-Trumpf-Karte abwerfen = kleinster Punktverlust." }},
+                                ]},
+                            ]},
+                        ]},
+                    ]},
+                ]},
+              ]},
+          ]},
+        ]},
+      ]},
+  ]
+};
+
+// ─── Helpers ───────────────────────────────────────────────
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function div(cls, text) {
+  const e = document.createElement("div");
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function winBadge(certainty) {
+  if (!certainty || certainty === "discard") return null;
+  const b = div("win-badge " + certainty);
+  const dot = div("win-badge-dot"); b.appendChild(dot);
+  const txt = document.createTextNode(certainty === "certain" ? "Sicher gewonnen" : "Versuch");
+  b.appendChild(txt);
+  return b;
+}
+
+function makeFBPanel(nodeId, container) {
+  container.innerHTML = "";
+  const entries = (fb[nodeId] || {}).entries || [];
+  const panel = div("fb-panel");
+
+  // Badges
+  const rc = {gut:0,mittel:0,schlecht:0};
+  entries.forEach(e => { if(e.rating) rc[e.rating]++; });
+  const tot = rc.gut + rc.mittel + rc.schlecht;
+  if (tot > 0) {
+    const brow = div("fb-badges");
+    ["gut","mittel","schlecht"].forEach(r => {
+      if (rc[r] > 0) { const b = div("badge " + r, rc[r] + " " + r); brow.appendChild(b); }
+    });
+    panel.appendChild(brow);
+  }
+
+  // Entries
+  if (entries.length > 0) {
+    const eDiv = div("fb-entries");
+    [...entries].reverse().forEach((e, ri) => {
+      const i = entries.length - 1 - ri;
+      const mine = e.nick === nick;
+      const eEl = div("fb-entry");
+      const top = div("fb-entry-top");
+      const meta = div("fb-entry-meta");
+      if (e.rating) { const rb = div("badge " + e.rating, e.rating === "gut" ? "👍 Gut" : e.rating === "mittel" ? "🤔 Mittel" : "👎 Schlecht"); meta.appendChild(rb); }
+      const nk = div("fb-entry-nick", e.nick || "?"); meta.appendChild(nk);
+      top.appendChild(meta);
+      const acts = div("fb-entry-meta");
+      const ds = div("fb-entry-date", new Date(e.ts).toLocaleDateString("de-DE",{day:"2-digit",month:"short"}));
+      acts.appendChild(ds);
+      if (mine) {
+        const del = el("button","fb-entry-del","🗑️");
+        del.title = "Löschen";
+        del.onclick = async () => {
+          const u = {...fb}; if (!u[nodeId]) return;
+          const ne = [...u[nodeId].entries]; ne.splice(i,1);
+          u[nodeId] = {entries: ne}; fb = u; await saveFB(u);
+          makeFBPanel(nodeId, container);
+        };
+        acts.appendChild(del);
+      }
+      top.appendChild(acts); eEl.appendChild(top);
+      if (e.note) { const txt = div("fb-entry-text", e.note); eEl.appendChild(txt); }
+      eDiv.appendChild(eEl);
+    });
+    panel.appendChild(eDiv);
+  }
+
+  if (!nick) {
+    const cta = div("fb-nick-cta","Spitznamen eingeben um Feedback zu hinterlassen…");
+    cta.onclick = () => { showNP = true; renderNickArea(); };
+    panel.appendChild(cta);
+  } else {
+    let selRating = null;
+    const rateRow = div("fb-rate-row");
+    ["gut","mittel","schlecht"].forEach(r => {
+      const rb = el("button","fb-rate-btn " + r, r==="gut"?"👍 Gut":r==="mittel"?"🤔 Mittel":"👎 Schlecht");
+      rb.onclick = () => {
+        selRating = selRating === r ? null : r;
+        rateRow.querySelectorAll(".fb-rate-btn").forEach(b => b.classList.remove("sel"));
+        if (selRating) rb.classList.add("sel");
+        sub.disabled = !ta.value.trim() && !selRating;
+      };
+      rateRow.appendChild(rb);
+    });
+    panel.appendChild(rateRow);
+    const irow = div("fb-input-row");
+    const ta = el("textarea","fb-ta"); ta.placeholder = "Notiz…"; ta.rows = 1;
+    ta.oninput = () => { sub.disabled = !ta.value.trim() && !selRating; };
+    ta.onkeydown = e => { if (e.key==="Enter" && (e.metaKey||e.ctrlKey) && !sub.disabled) sub.click(); };
+    const sub = el("button","fb-submit","↵"); sub.disabled = true;
+    sub.onclick = async () => {
+      if (!ta.value.trim() && !selRating) return;
+      const entry = {note:ta.value.trim(),rating:selRating,nick,ts:Date.now()};
+      const u = {...fb}; if (!u[nodeId]) u[nodeId] = {entries:[]};
+      u[nodeId] = {entries:[...u[nodeId].entries, entry]};
+      fb = u; await saveFB(u);
+      makeFBPanel(nodeId, container);
+    };
+    irow.appendChild(ta); irow.appendChild(sub);
+    panel.appendChild(irow);
+    const hint = div("fb-hint");
+    hint.innerHTML = `Als <strong style="font-family:var(--mono);color:var(--accent)">${nick}</strong> · <a>ändern</a>`;
+    hint.querySelector("a").onclick = () => { showNP = true; renderNickArea(); };
+    panel.appendChild(hint);
+  }
+  container.appendChild(panel);
+}
+
+function makeFBBtn(nodeId) {
+  const entries = (fb[nodeId] || {}).entries || [];
+  const cnt = entries.length;
+  const btn = el("button","fb-btn" + (cnt>0?" has":""), "💬" + (cnt>0?" "+cnt:""));
+  const panelDiv = div("");
+  let open = false;
+  btn.onclick = e => {
+    e.stopPropagation();
+    open = !open;
+    btn.classList.toggle("active", open);
+    if (open) makeFBPanel(nodeId, panelDiv);
+    else panelDiv.innerHTML = "";
+  };
+  return {btn, panelDiv};
+}
+
+function renderAction(data) {
+  if (!data) return div("");
+  const cls = data.type || "green";
+  const wrap = div("action-card " + cls);
+  const header = div("action-header");
+  const body = div("action-body");
+
+  if (data.ref) {
+    const ref = div("action-ref","[" + data.ref + "]");
+    body.appendChild(ref);
+  }
+  const title = div("action-title", data.title); body.appendChild(title);
+  if (data.desc) { const desc = div("action-desc", data.desc); body.appendChild(desc); }
+  header.appendChild(body);
+
+  const meta = div("node-meta");
+  const wb = winBadge(data.certainty);
+  if (wb) meta.appendChild(wb);
+  if (data.id) {
+    const {btn, panelDiv} = makeFBBtn(data.id);
+    meta.appendChild(btn);
+    header.appendChild(meta);
+    wrap.appendChild(header);
+    wrap.appendChild(panelDiv);
+  } else {
+    header.appendChild(meta);
+    wrap.appendChild(header);
+  }
+  return wrap;
+}
+
+function labelClass(lc) {
+  return "blabel" + (lc ? " " + lc : "");
+}
+
+function renderBranch(b, depth) {
+  const wrap = div("");
+
+  // A branch is collapsible if it has sub-content beyond a single action
+  const isCollapsible = !!(b.children || b.branches || (b.yes && !b.yes.action));
+
+  // ── Label row (always visible) ──
+  const lblRow = div("branch-label-row");
+  const lbl = div(labelClass(b.lc));
+  if (b.ref) {
+    const refSpan = el("span","blabel-ref","[" + b.ref + "]");
+    lbl.appendChild(refSpan);
+    lbl.appendChild(document.createTextNode(" " + b.label));
+  } else {
+    lbl.textContent = b.label;
+  }
+  lblRow.appendChild(lbl);
+
+  let arrowBtn = null;
+  let bodyDiv = null;
+  let branchOpen = depth < 2;
+
+  if (isCollapsible) {
+    arrowBtn = div("branch-arrow" + (branchOpen ? " open" : ""), "▶");
+    lblRow.appendChild(arrowBtn);
+    wrap.appendChild(lblRow);
+
+    bodyDiv = div("branch-body");
+    if (!branchOpen) bodyDiv.style.display = "none";
+
+    lblRow.style.cursor = "pointer";
+    lblRow.onclick = () => {
+      branchOpen = !branchOpen;
+      arrowBtn.classList.toggle("open", branchOpen);
+      bodyDiv.style.display = branchOpen ? "" : "none";
+    };
+    wrap.appendChild(bodyDiv);
+  } else {
+    wrap.appendChild(lblRow);
+    bodyDiv = wrap;
+  }
+
+  const target = bodyDiv;
+
+  if (b.title && !b.yes && !b.branches && !b.children && !b.refTo) {
+    const t = div(""); t.style.cssText="font-size:12px;font-weight:500;color:var(--text);margin:3px 0 2px 1px";
+    t.textContent = b.title; target.appendChild(t);
+  }
+  if (b.desc) { const d = div("b-desc", b.desc); target.appendChild(d); }
+  if (b.condition) { const c = div("b-cond","↳ Wenn: " + b.condition); target.appendChild(c); }
+  if (b.refNote) { const rn = div("refnote", b.refNote); target.appendChild(rn); }
+  if (b.refTo && b.refLabel) { const rn = div("refnote", b.refLabel); target.appendChild(rn); }
+  if (b.yes && b.yes.action) { target.appendChild(renderAction(b.yes)); }
+  else if (b.yes && !b.yes.action) { target.appendChild(renderNode(b.yes, depth+1)); }
+  if (b.children) b.children.forEach(child => target.appendChild(renderNode(child, depth+1)));
+  if (b.branches) b.branches.forEach(sub => target.appendChild(renderBranch(sub, depth+1)));
+
+  return wrap;
+}
+
+function renderNode(node, depth) {
+  if (!node || typeof node !== "object") return div("");
+  if (node.action) return renderAction(node);
+
+  const hasKids = node.yes || node.no || node.branches || node.children;
+  const wrap = div("node");
+
+  if (node.section) {
+    const sec = div("section-div");
+    const hr1 = document.createElement("hr"); sec.appendChild(hr1);
+    sec.appendChild(document.createTextNode(node.section));
+    const hr2 = document.createElement("hr"); sec.appendChild(hr2);
+    wrap.appendChild(sec);
+  }
+
+  const card = div("node-card" + (depth < 2 ? " open" : "") + (hasKids ? " clickable" : ""));
+  const header = div("node-header");
+  if (node.icon) { const ico = div("node-icon", node.icon); header.appendChild(ico); }
+  const body = div("node-body");
+  if (node.ref) { const ref = div("node-ref","[" + node.ref + "]"); body.appendChild(ref); }
+  const title = div("node-title", node.title); body.appendChild(title);
+  if (node.desc) { const desc = div("node-desc", node.desc); body.appendChild(desc); }
+  if (node.conditions) {
+    const cd = div("node-conds");
+    cd.innerHTML = "<b>Bedingungen:</b> " + node.conditions.join(" · ");
+    body.appendChild(cd);
+  }
+  header.appendChild(body);
+
+  const meta = div("node-meta");
+  let fbBtn = null, fbPanel = null;
+  if (node.id) {
+    const {btn, panelDiv} = makeFBBtn(node.id);
+    fbBtn = btn; fbPanel = panelDiv;
+    meta.appendChild(btn);
+  }
+  let arrowEl = null;
+  if (hasKids) { arrowEl = div("arrow" + (depth < 2 ? " open" : ""), "▶"); meta.appendChild(arrowEl); }
+  header.appendChild(meta);
+  card.appendChild(header);
+  if (fbPanel) card.appendChild(fbPanel);
+
+  const childrenDiv = div("children");
+  let open = depth < 2;
+  if (!open) childrenDiv.style.display = "none";
+
+  if (hasKids) {
+    card.onclick = e => {
+      if (e.target.closest(".fb-btn") || e.target.closest(".fb-panel") || e.target.closest(".fb-entry-del")) return;
+      open = !open;
+      card.classList.toggle("open", open);
+      if (arrowEl) arrowEl.classList.toggle("open", open);
+      childrenDiv.style.display = open ? "" : "none";
+    };
+
+    if (node.yes) {
+      const lbl = div("blabel green", "[Ja]"); childrenDiv.appendChild(lbl);
+      if (node.yes.action) childrenDiv.appendChild(renderAction(node.yes));
+      else childrenDiv.appendChild(renderNode(node.yes, depth+1));
+    }
+    if (node.no) {
+      const lbl = div("blabel red", "[Nein]"); childrenDiv.appendChild(lbl);
+      if (node.no.action) childrenDiv.appendChild(renderAction(node.no));
+      else childrenDiv.appendChild(renderNode(node.no, depth+1));
+    }
+    if (node.branches) node.branches.forEach(b => childrenDiv.appendChild(renderBranch(b, depth)));
+    if (node.children) node.children.forEach(child => childrenDiv.appendChild(renderNode(child, depth+1)));
+  }
+
+  wrap.appendChild(card);
+  if (hasKids) wrap.appendChild(childrenDiv);
+  return wrap;
+}
+
+function renderNickArea() {
+  const area = document.getElementById("nick-area");
+  area.innerHTML = "";
+  if (showNP) {
+    const prompt = div("nick-prompt");
+    const p = document.createElement("p"); p.textContent = "Wie heißt du?";
+    prompt.appendChild(p);
+    const row = div("nick-row");
+    const inp = document.createElement("input");
+    inp.className = "nick-inp"; inp.type = "text"; inp.placeholder = "Dein Spitzname…";
+    const btn = el("button","nick-go","Los");
+    const go = async () => {
+      const v = inp.value.trim(); if (!v) return;
+      nick = v; showNP = false; await saveNick(v); renderNickArea();
+    };
+    btn.onclick = go;
+    inp.onkeydown = e => { if (e.key === "Enter") go(); };
+    row.appendChild(inp); row.appendChild(btn); prompt.appendChild(row);
+    area.appendChild(prompt);
+    setTimeout(() => inp.focus(), 50);
+  } else if (!nick) {
+    const cta = div("nick-enter","👤 Spitznamen eingeben um Notizen und Bewertungen zu hinterlassen");
+    cta.onclick = () => { showNP = true; renderNickArea(); };
+    area.appendChild(cta);
+  } else {
+    const bar = div("nick-bar");
+    const left = div(""); left.innerHTML = `Angemeldet als <strong>${nick}</strong>`;
+    bar.appendChild(left);
+    const ch = document.createElement("a"); ch.textContent = "ändern";
+    ch.onclick = () => { showNP = true; renderNickArea(); };
+    bar.appendChild(ch);
+    area.appendChild(bar);
+  }
+}
+
+
+// ─── Export / Import ───────────────────────────────────────
+function renderIOBar(msg, msgType) {
+  const bar = document.getElementById("io-bar");
+  bar.innerHTML = "";
+
+  // Export button
+  const expBtn = document.createElement("button");
+  expBtn.className = "io-btn io-btn-export";
+  expBtn.innerHTML = "⬇ Notizen exportieren (.json)";
+  expBtn.onclick = async () => {
+    const data = await loadFB();
+    const exportObj = {
+      version: 1,
+      artifact: "KonterMatt-P3-v13",
+      exportedAt: new Date().toISOString(),
+      exportedBy: nick || "anonym",
+      feedback: data
+    };
+    const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const dateStr = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `KonterMatt-P3-Notizen-${dateStr}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    renderIOBar("Exportiert!", "ok");
+    setTimeout(() => renderIOBar(), 3000);
+  };
+  bar.appendChild(expBtn);
+
+  // Import button
+  const impBtn = document.createElement("button");
+  impBtn.className = "io-btn io-btn-import";
+  impBtn.innerHTML = "⬆ Notizen importieren (.json)";
+  impBtn.onclick = () => {
+    document.getElementById("import-file-input").click();
+  };
+  bar.appendChild(impBtn);
+
+  // Message
+  if (msg) {
+    const msgEl = document.createElement("span");
+    msgEl.className = "io-msg " + (msgType || "ok");
+    msgEl.textContent = msg;
+    bar.appendChild(msgEl);
+  }
+}
+
+function setupImport() {
+  const input = document.getElementById("import-file-input");
+  input.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!parsed.feedback || typeof parsed.feedback !== "object") {
+        renderIOBar("Ungültige Datei — kein feedback-Objekt gefunden.", "err");
+        setTimeout(() => renderIOBar(), 4000);
+        input.value = "";
+        return;
+      }
+      // Merge: imported entries are added to existing, duplicates (same ts) skipped
+      const existing = await loadFB();
+      const merged = { ...existing };
+      let added = 0;
+      for (const [nodeId, nodeData] of Object.entries(parsed.feedback)) {
+        if (!nodeData.entries) continue;
+        if (!merged[nodeId]) merged[nodeId] = { entries: [] };
+        const existingTs = new Set(merged[nodeId].entries.map(e => e.ts));
+        for (const entry of nodeData.entries) {
+          if (!existingTs.has(entry.ts)) {
+            merged[nodeId].entries.push(entry);
+            added++;
+          }
+        }
+      }
+      fb = merged;
+      await saveFB(merged);
+      // Re-render tree
+      document.getElementById("tree").innerHTML = "";
+      document.getElementById("tree").appendChild(renderNode(TREE, 0));
+      const byLine = parsed.exportedBy ? ` von ${parsed.exportedBy}` : "";
+      renderIOBar(`${added} neue Einträge importiert${byLine} (${file.name})`, "ok");
+      setTimeout(() => renderIOBar(), 5000);
+    } catch (err) {
+      renderIOBar("Fehler beim Lesen der Datei: " + err.message, "err");
+      setTimeout(() => renderIOBar(), 4000);
+    }
+    input.value = "";
+  });
+}
+
+async function init() {
+  fb = await loadFB();
+  nick = await loadNick();
+  renderNickArea();
+  renderIOBar();
+  setupImport();
+  document.getElementById("tree").appendChild(renderNode(TREE, 0));
+  // Show storage mode in footer
+  const hint = document.getElementById("share-hint");
+  if (hint) hint.textContent = useStorage ? "Notizen werden geteilt gespeichert" : "Notizen werden lokal gespeichert";
+}
+init();
+</script>
+</body>
+</html>
