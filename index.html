@@ -312,7 +312,7 @@ const TREE = {
                         title:"→ Stärkste Karte die aktuell den Stich gewinnen würde",
                         desc:"Versuch den entscheidenden Stich zu holen. Spieler 4 könnte noch überbieten." }},
                 { id:"pre2b1b", ref:"P3-2b.1b", label:"Ich kann den Stich nicht gewinnen",
-                  refTo:"pre3", refLabel:"→ Weiter zu P3-3 (normales Spiel-der Stich ist noch nicht entscheidend für den Gewinn der Runde)" },
+                  refTo:"pre3", refLabel:"→ Weiter zu P3-3 (normales Spiel)" },
               ]},
           ]},
       ]},
@@ -330,7 +330,7 @@ const TREE = {
                 title:"→ Niedrigste Karte spielen (Schadensbegrenzung)",
                 desc:"Stich kann nicht mehr gewonnen werden, Runde ist verloren. Niedrigste Karte abwerfen." }},
       ]},
-    { id:"pre3", ref:"P3-3", label:"Normales Spiel", lc:"gray", children:[
+    { id:"pre3", ref:"P3-3", label:"Normales Spiel-der Stich ist noch nicht entscheidend für den Gewinn der Runde", lc:"gray", children:[
       { id:"s0", ref:"P3-3.1", icon:"🂠",
         title:"Nur eine spielbare Karte? (inkl. Stich 6)",
         desc:"Wenn nur eine Karte regelkonform gespielt werden kann (oder es Stich 6 ist und nur eine Karte übrig), gibt es keine Entscheidung.",
